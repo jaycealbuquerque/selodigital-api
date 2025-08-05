@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int            @id @default(autoincrement())
+  nome          String
+  email         String         @unique
+  cpf           String         @unique
+  cargo         String
+  password_hash String
+  createdAt     DateTime       @default(now())
+  UsuarioToken  UsuarioToken[]
+  Ato           Ato[]
+}
+
+model UsuarioToken {
+  id            String   @id @default(uuid())
+  refresh_token String
+  expires_date  DateTime
+
+  user_id Int
+
+  created_at DateTime @default(now())
+  Usuario    Usuario? @relation(fields: [user_id], references: [id])
+
+  @@map("users_token")
+}
+
+model Pedido {
+  id        Int      @id @default(autoincrement())
+  chave     String   @unique
+  dataHora  String
+  recebido  Boolean  @default(false) // Indica se o pedido foi recepcionado
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Selo {
+  id          Int      @id @default(autoincrement())
+  codigoSelo  String
+  numeroSerie String
+  validador   String
+  status      Int
+  chave       BigInt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
+  // Relacionamento 1:1 com Ato (opcional)
+  ato         Ato?
+}
+
+model Atendimento {
+  id                Int      @id @default(autoincrement())
+  numeroAtendimento BigInt   @unique
+  dataAtendimento   DateTime @db.Date // Apenas data (YYYY-MM-DD)
+  statusAtendimento Boolean  @default(false)
+  atos              Ato[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt()
+}
+
+model Lote {
+  idLote    Int      @id @unique @default(autoincrement())
+  atos      Ato[] //@relation("LoteAto") // Nome da relação é opcional, mas útil
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Ato {
+  idAto Int @id @unique @default(autoincrement())
+
+  // Chave estrangeira para Lote (opcional)
+  loteId Int?
+  lote   Lote? @relation(fields: [loteId], references: [idLote])
+  // lote   Lote? @relation("LoteAto", fields: [loteId], references: [idLote])
+
+  // Chave estrangeira para Atendimento
+  atendimentoId Int
+  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
+
+  dataAtoPraticado   DateTime @db.Timestamptz
+  dataAtoSolicitacao DateTime @db.Timestamptz
+
+  valorEmolumento      Float
+  valorFermoju         Float
+  valorEmolumentoLivre Float
+
+  // numeroAtendimento String
+  tipoCobranca     Int
+  tipoMovimentacao Int
+  cpfEscrevente    String
+  idUsuario        Int
+  usuario          Usuario @relation(fields: [idUsuario], references: [id])
+  codigoAto        String
+
+  // Chave estrangeira para Selo (opcional, pois pode não ter um selo)
+  seloId Int?  @unique
+  selo   Selo? @relation(fields: [seloId], references: [id])
+
+  seloOrigem String?
+  tipoParte  Int?
+  // signatarios Signatario
+
+  deficienteVisual     Boolean
+  relativamenteIncapaz Boolean
+  assinaturaARogo      Boolean
+
+  tipoDocumentoDut Int
+  descricaoDocDut  String?
+  ressalva         String?
+
+  renavam      String
+  dutImagemPdf String? @db.Text // Armazena PDF em Base64 como TEXT
+
+  numeroCartaoAutografo Int?
+  // signatarioId Int?
+  Signatario            Signatario? @relation(fields: [numeroCartaoAutografo], references: [id])
+
+  // Relacionamento com Exif (1:1)
+  imgId     Int?     @unique
+  imgDut    ImgDut?  @relation(fields: [imgId], references: [id])
+  // Status indicando se o ato foi enviado
+  statusAto Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  loteIdLote Int?
+}
+
+model ImgDut {
+  id               Int    @id @default(autoincrement())
+  imagemSignatario String @db.Text // Imagem em Base64
+
+  ato Ato?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model DescricaoDoc {
+  id            Int     @id @default(autoincrement())
+  tipoDocumento Int?
+  descricao     String?
+  ressalva      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Signatario {
+  id              Int     @id @default(autoincrement())
+  nomePessoa      String
+  tipoDocumento   Int?
+  numeroDocumento String? @unique
+  atos            Ato[]
+
+  sinalPublicoId Int?          @unique // Relacionamento 1:1 com SinalPublico
+  sinalPublico   SinalPublico? @relation(fields: [sinalPublicoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model SinalPublico {
+  id                   Int     @id @default(autoincrement())
+  nomeOficioSignatario String
+  cidadeOficio         String?
+  estadoOficio         String?
+  seloUtilizado        String?
+
+  Signatario Signatario?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}

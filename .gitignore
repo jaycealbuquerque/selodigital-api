@@ -1,0 +1,44 @@
+node_modules
+.vscode
+build
+.env
+
+# Ignorar certificados e arquivos sensíveis
+src/config/*.pfx
+
+# Logs
+logs/**.json
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+/docker-compose-data
+/docker-data
+
+# Package
+/yarn.lock
+/pnpm-lock.yaml
+
+# IDEs
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.nova/*
+.idea/*
+
+# Project related
+/src/env.yml
+*.env
+
+/temp/*
+
+.DS_Store
+*.DS_Store
+.tool-versions
+
+/prisma/migrations/*
