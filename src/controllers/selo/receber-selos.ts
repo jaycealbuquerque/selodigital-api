@@ -3,13 +3,9 @@ import { ReceberSelosService } from '../../services/selo/receber-selos-service'
 
 export class ReceberSelosController {
   async handle(request: Request, response: Response) {
-    const { ato } = request.body
-
     const receberSelosService = new ReceberSelosService()
 
-    const receberSelos = await receberSelosService.execute({
-      ato,
-    })
+    const receberSelos = await receberSelosService.execute()
 
     return response.json(receberSelos)
   }

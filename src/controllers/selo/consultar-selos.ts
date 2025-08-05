@@ -3,13 +3,9 @@ import { ConsultarSelosService } from '../../services/selo/consultar-selos-servi
 
 export class ConsultarSelosController {
   async handle(request: Request, response: Response) {
-    const { ato } = request.body
-
     const consultarSelosService = new ConsultarSelosService()
 
-    const consultarSelos = await consultarSelosService.execute({
-      ato,
-    })
+    const consultarSelos = await consultarSelosService.execute()
 
     return response.json(consultarSelos)
   }

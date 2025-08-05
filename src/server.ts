@@ -3,6 +3,9 @@ import 'express-async-errors'
 
 import routes from './routes/route'
 import { AppError } from './erros/AppError'
+import { configureBigIntSerialization } from './middlewares/bigint-to-json'
+
+configureBigIntSerialization()
 
 const app = express()
 app.use(express.json())

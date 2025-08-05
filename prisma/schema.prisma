@@ -39,7 +39,7 @@ model UsuarioToken {
 }
 
 model Pedido {
-  id        Int      @id @default(autoincrement())
+  id        BigInt   @id @unique
   chave     String   @unique
   dataHora  String
   recebido  Boolean  @default(false) // Indica se o pedido foi recepcionado
