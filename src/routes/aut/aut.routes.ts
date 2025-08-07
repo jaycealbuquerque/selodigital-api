@@ -21,8 +21,16 @@ const sendOneController = new SendOneController()
 
 autRouter.post('/criaraut', ensureAuthenticated, createAutController.handle)
 autRouter.delete('/deleteaut', ensureAuthenticated, deleteAutController.handle)
-autRouter.get('/getoneaut', ensureAuthenticated, getOneAutController.handle)
-autRouter.get('/listallaut', ensureAuthenticated, listAllAutController.handle)
+autRouter.post(
+  '/getoneaut/:idAto',
+  ensureAuthenticated,
+  getOneAutController.handle,
+)
+autRouter.post(
+  '/listallaut/:numeroAtendimento',
+  ensureAuthenticated,
+  listAllAutController.handle,
+)
 autRouter.post(
   '/selarallaut',
   ensureAuthenticated,

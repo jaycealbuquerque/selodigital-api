@@ -3,12 +3,30 @@ import { CreateAutService } from '../../services/aut/create-aut-service'
 
 export class CreateAutController {
   async handle(request: Request, response: Response) {
-    const { ato } = request.body
+    const {
+      cpfresponsavel,
+      nomePessoa,
+      tipoDocumento,
+      numeroDocumento,
+      tipoDocumentoDescricao,
+      descricaoDocumento,
+      idUsuario,
+      numeroAtendimento,
+      quantidade,
+    } = request.body
 
     const createAutService = new CreateAutService()
 
     const createAut = await createAutService.execute({
-      ato,
+      cpfresponsavel,
+      nomePessoa,
+      tipoDocumento,
+      numeroDocumento,
+      tipoDocumentoDescricao,
+      descricaoDocumento,
+      idUsuario,
+      numeroAtendimento,
+      quantidade,
     })
 
     return response.json(createAut)

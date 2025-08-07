@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
@@ -65,9 +61,11 @@ model Atendimento {
   numeroAtendimento BigInt   @unique
   dataAtendimento   DateTime @db.Date // Apenas data (YYYY-MM-DD)
   statusAtendimento Boolean  @default(false)
+  dataAtoPraticado   DateTime @db.Timestamptz
+  dataAtoSolicitacao DateTime @db.Timestamptz
   atos              Ato[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt()
+  createdAt         DateTime @default(now()) @db.Timestamptz
+  updatedAt         DateTime @updatedAt() @db.Timestamptz
 }
 
 model Lote {
@@ -89,8 +87,6 @@ model Ato {
   atendimentoId Int
   atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
 
-  dataAtoPraticado   DateTime @db.Timestamptz
-  dataAtoSolicitacao DateTime @db.Timestamptz
 
   valorEmolumento      Float
   valorFermoju         Float
@@ -116,12 +112,10 @@ model Ato {
   relativamenteIncapaz Boolean
   assinaturaARogo      Boolean
 
-  tipoDocumentoDut Int
-  descricaoDocDut  String?
+ 
   ressalva         String?
 
-  renavam      String
-  dutImagemPdf String? @db.Text // Armazena PDF em Base64 como TEXT
+  renavam      String?
 
   numeroCartaoAutografo Int?
   // signatarioId Int?
@@ -129,7 +123,15 @@ model Ato {
 
   // Relacionamento com Exif (1:1)
   imgId     Int?     @unique
-  imgDut    ImgDut?  @relation(fields: [imgId], references: [id])
+  imgDut    ImgRTD?  @relation(fields: [imgId], references: [id])
+
+  solicitanteId Int 
+  solicitante   Solicitante @relation(fields: [solicitanteId], references: [id])
+
+  descricaoDocId Int 
+  descricaoDoc   DescricaoDoc @relation(fields: [descricaoDocId], references: [id])
+
+
   // Status indicando se o ato foi enviado
   statusAto Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -138,9 +140,9 @@ model Ato {
   loteIdLote Int?
 }
 
-model ImgDut {
+model ImgRTD {
   id               Int    @id @default(autoincrement())
-  imagemSignatario String @db.Text // Imagem em Base64
+  imagemRTD String @db.Text // Imagem em Base64
 
   ato Ato?
 
@@ -148,11 +150,27 @@ model ImgDut {
   updatedAt DateTime @updatedAt()
 }
 
+model Solicitante {
+  id             Int        @id @default(autoincrement())
+  nomePessoa     String
+  tipoDocumento  Int
+  numeroDocumento String? @unique
+
+  tipoTelefone   Int?
+  dddTelefone     String?   @db.VarChar(3)
+  numeroTelefone  String?   @db.VarChar(20)
+
+  ato Ato[]
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt()
+}
 model DescricaoDoc {
   id            Int     @id @default(autoincrement())
   tipoDocumento Int?
   descricao     String?
-  ressalva      String?
+
+  ato Ato[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()

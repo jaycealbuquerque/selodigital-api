@@ -3,13 +3,11 @@ import { GetOneAutService } from '../../services/aut/get-one-service'
 
 export class GetOneAutController {
   async handle(request: Request, response: Response) {
-    const { ato } = request.body
+    const { idAto } = request.params
 
     const getOneAutService = new GetOneAutService()
 
-    const getOneAut = await getOneAutService.execute({
-      ato,
-    })
+    const getOneAut = await getOneAutService.execute(idAto)
 
     return response.json(getOneAut)
   }
