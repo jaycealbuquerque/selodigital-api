@@ -1,38 +1,43 @@
 import { AppError } from '../../erros/AppError'
 import { prisma } from '../../lib/prisma'
 
-interface CreateAutInput {
-  dataAtoSolicitacao: string
+export interface CreateAutInput {
   cpfresponsavel: string
-  nomePessoa: string
-  tipoDocumento: number
-  numeroDocumento: string
-  tipoDocumentoDescricao: number
-  descricaoDocumento?: string
   idUsuario: number
   numeroAtendimento: string // <- novo campo recebido
+  tipoAtoId: number
+  tipoDocumentoDescricao: number
   quantidade: number
+  solicitante: {
+    nomePessoa: string
+    tipoDocumento: number
+    numeroDocumento: string
+    telefone: {
+      tipoTelefone: number
+      dddTelefone: string
+      numeroTelefone: string
+    }
+  }
 }
 
 export class CreateAutService {
   async execute({
     cpfresponsavel,
-    nomePessoa,
-    tipoDocumento,
-    numeroDocumento,
+    solicitante,
     tipoDocumentoDescricao,
-    descricaoDocumento,
     idUsuario,
     numeroAtendimento,
+    tipoAtoId,
     quantidade,
   }: CreateAutInput) {
     // Validação mínima
     if (
       !cpfresponsavel ||
-      !nomePessoa ||
-      !numeroDocumento ||
+      !solicitante ||
+      !tipoDocumentoDescricao ||
       !idUsuario ||
       !numeroAtendimento ||
+      !tipoAtoId ||
       !quantidade
     ) {
       throw new AppError('Campos obrigatórios não informados.', 400)
@@ -49,27 +54,49 @@ export class CreateAutService {
 
     // Transação para garantir consistência
     return await prisma.$transaction(async (prisma) => {
+      // Cria o telefone do solicitante
+      const telefoneCriado = await prisma.telefone.create({
+        data: {
+          tipoTelefone: solicitante.telefone.tipoTelefone,
+          dddTelefone: solicitante.telefone.dddTelefone,
+          numeroTelefone: solicitante.telefone.numeroTelefone,
+        },
+      })
       // Cria ou atualiza o Solicitante
-      const solicitante = await prisma.solicitante.upsert({
-        where: { numeroDocumento },
+      const solicitanteCriado = await prisma.solicitante.upsert({
+        where: { numeroDocumento: solicitante.numeroDocumento },
         update: {
-          nomePessoa,
-          tipoDocumento,
+          nomePessoa: solicitante.nomePessoa,
+          tipoDocumento: solicitante.tipoDocumento,
+          telefoneId: telefoneCriado.id,
         },
         create: {
-          nomePessoa,
-          tipoDocumento,
-          numeroDocumento,
+          nomePessoa: solicitante.nomePessoa,
+          tipoDocumento: solicitante.tipoDocumento,
+          numeroDocumento: solicitante.numeroDocumento,
+          telefoneId: telefoneCriado.id,
         },
       })
 
-      // Cria descrição do documento
-      const descricaoDoc = await prisma.descricaoDoc.create({
-        data: {
+      // Busca o DescricaoDoc já existente
+      const descricaoDocExistente = await prisma.descricaoDoc.findFirst({
+        where: {
           tipoDocumento: tipoDocumentoDescricao,
-          descricao: descricaoDocumento || '',
         },
       })
+
+      if (!descricaoDocExistente) {
+        throw new AppError('Descrição do documento não encontrada.', 404)
+      }
+
+      // Confirma que o tipo de ato informado existe
+      const tipoAto = await prisma.tipoAto.findUnique({
+        where: { id: tipoAtoId },
+      })
+
+      if (!tipoAto) {
+        throw new AppError('Tipo de ato não encontrado.', 404)
+      }
 
       // Criação do ato
       // Criação de múltiplos atos
@@ -86,9 +113,10 @@ export class CreateAutService {
               tipoMovimentacao: 4,
               cpfEscrevente: cpfresponsavel,
               idUsuario,
+              tipoSeloId: 3,
               codigoAto: '002021', // conforme padrão da autenticação
               seloId: null,
-              seloOrigem: null,
+              seloOrigemVendedorOuSinalPublico: null,
               tipoParte: null,
               deficienteVisual: false,
               relativamenteIncapaz: false,
@@ -96,8 +124,9 @@ export class CreateAutService {
               renavam: null,
               ressalva: null,
               statusAto: false,
-              solicitanteId: solicitante.id,
-              descricaoDocId: descricaoDoc.id,
+              solicitanteId: solicitanteCriado.id,
+              descricaoDocId: descricaoDocExistente.id,
+              tipoAtoId,
             },
           }),
         ),

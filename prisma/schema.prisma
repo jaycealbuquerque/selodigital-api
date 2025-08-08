@@ -1,5 +1,3 @@
-
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -57,15 +55,15 @@ model Selo {
 }
 
 model Atendimento {
-  id                Int      @id @default(autoincrement())
-  numeroAtendimento BigInt   @unique
-  dataAtendimento   DateTime @db.Date // Apenas data (YYYY-MM-DD)
-  statusAtendimento Boolean  @default(false)
+  id                 Int      @id @default(autoincrement())
+  numeroAtendimento  BigInt   @unique
+  dataAtendimento    DateTime @db.Date // Apenas data (YYYY-MM-DD)
+  statusAtendimento  Boolean  @default(false)
   dataAtoPraticado   DateTime @db.Timestamptz
   dataAtoSolicitacao DateTime @db.Timestamptz
-  atos              Ato[]
-  createdAt         DateTime @default(now()) @db.Timestamptz
-  updatedAt         DateTime @updatedAt() @db.Timestamptz
+  atos               Ato[]
+  createdAt          DateTime @default(now()) @db.Timestamptz
+  updatedAt          DateTime @updatedAt() @db.Timestamptz
 }
 
 model Lote {
@@ -87,7 +85,6 @@ model Ato {
   atendimentoId Int
   atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
 
-
   valorEmolumento      Float
   valorFermoju         Float
   valorEmolumentoLivre Float
@@ -104,33 +101,38 @@ model Ato {
   seloId Int?  @unique
   selo   Selo? @relation(fields: [seloId], references: [id])
 
-  seloOrigem String?
-  tipoParte  Int?
+  seloOrigemComprador              String?
+  seloOrigemVendedorOuSinalPublico String?
+  tipoParte                        Int?
   // signatarios Signatario
 
   deficienteVisual     Boolean
   relativamenteIncapaz Boolean
   assinaturaARogo      Boolean
 
- 
-  ressalva         String?
+  ressalva String?
 
-  renavam      String?
+  renavam String?
 
   numeroCartaoAutografo Int?
   // signatarioId Int?
   Signatario            Signatario? @relation(fields: [numeroCartaoAutografo], references: [id])
 
-  // Relacionamento com Exif (1:1)
-  imgId     Int?     @unique
-  imgDut    ImgRTD?  @relation(fields: [imgId], references: [id])
+  tipoAtoId Int
+  tipoAto   TipoAto @relation(fields: [tipoAtoId], references: [id])
 
-  solicitanteId Int 
-  solicitante   Solicitante @relation(fields: [solicitanteId], references: [id])
+  tipoSeloId Int
+  tipoSelo   TipoSelo @relation(fields: [tipoSeloId], references: [id])
 
-  descricaoDocId Int 
+  // Relacionamento  (1:1)
+  imgId  Int?    @unique
+  imgDut ImgRTD? @relation(fields: [imgId], references: [id])
+
+  solicitanteId Int?
+  solicitante   Solicitante? @relation(fields: [solicitanteId], references: [id])
+
+  descricaoDocId Int
   descricaoDoc   DescricaoDoc @relation(fields: [descricaoDocId], references: [id])
-
 
   // Status indicando se o ato foi enviado
   statusAto Boolean  @default(false)
@@ -140,8 +142,28 @@ model Ato {
   loteIdLote Int?
 }
 
+model TipoAto {
+  id   Int    @id @default(autoincrement())
+  tipo String @unique
+
+  ato Ato[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model TipoSelo {
+  id        Int    @id @default(autoincrement())
+  descricao String @unique
+
+  ato Ato[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
 model ImgRTD {
-  id               Int    @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   imagemRTD String @db.Text // Imagem em Base64
 
   ato Ato?
@@ -151,20 +173,24 @@ model ImgRTD {
 }
 
 model Solicitante {
-  id             Int        @id @default(autoincrement())
-  nomePessoa     String
-  tipoDocumento  Int
+  id              Int     @id @default(autoincrement())
+  nomePessoa      String
+  tipoDocumento   Int
   numeroDocumento String? @unique
 
   tipoTelefone   Int?
-  dddTelefone     String?   @db.VarChar(3)
-  numeroTelefone  String?   @db.VarChar(20)
+  dddTelefone    String? @db.VarChar(3)
+  numeroTelefone String? @db.VarChar(20)
 
   ato Ato[]
 
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt()
+  telefoneId Int?
+  Telefone   Telefone? @relation(fields: [telefoneId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
+
 model DescricaoDoc {
   id            Int     @id @default(autoincrement())
   tipoDocumento Int?
@@ -176,15 +202,32 @@ model DescricaoDoc {
   updatedAt DateTime @updatedAt()
 }
 
+model Telefone {
+  id             Int     @id @default(autoincrement())
+  tipoTelefone   Int?
+  dddTelefone    String? @db.VarChar(3)
+  numeroTelefone String? @db.VarChar(20)
+
+  signatario  Signatario[]
+  solicitante Solicitante[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
 model Signatario {
   id              Int     @id @default(autoincrement())
   nomePessoa      String
   tipoDocumento   Int?
   numeroDocumento String? @unique
-  atos            Ato[]
+
+  atos Ato[]
 
   sinalPublicoId Int?          @unique // Relacionamento 1:1 com SinalPublico
   sinalPublico   SinalPublico? @relation(fields: [sinalPublicoId], references: [id])
+
+  telefoneId Int?
+  Telefone   Telefone? @relation(fields: [telefoneId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
