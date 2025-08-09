@@ -83,7 +83,7 @@ model Ato {
 
   // Chave estrangeira para Atendimento
   atendimentoId Int
-  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
+  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id], onDelete: Cascade)
 
   valorEmolumento      Float
   valorFermoju         Float
@@ -125,8 +125,11 @@ model Ato {
   tipoSelo   TipoSelo @relation(fields: [tipoSeloId], references: [id])
 
   // Relacionamento  (1:1)
-  imgId  Int?    @unique
-  imgDut ImgRTD? @relation(fields: [imgId], references: [id])
+  // imgId  Int?    @unique
+  // imgDut ImgRTD? @relation(fields: [imgId], references: [id])
+
+  // lado inverso 1:1 (sem FK aqui)
+  imgDut ImgRTD?
 
   solicitanteId Int?
   solicitante   Solicitante? @relation(fields: [solicitanteId], references: [id])
@@ -166,7 +169,10 @@ model ImgRTD {
   id        Int    @id @default(autoincrement())
   imagemRTD String @db.Text // Imagem em Base64
 
-  ato Ato?
+  // ato Ato?
+  // <<< novo: FK para Ato, 1:1, com CASCADE >>>
+  atoId Int @unique
+  ato   Ato @relation(fields: [atoId], references: [idAto], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
