@@ -1,4 +1,3 @@
-// services/rtd/create-rtd-service.ts
 import { AppError } from '../../erros/AppError'
 import { prisma } from '../../lib/prisma'
 
@@ -35,9 +34,6 @@ export class CreateRtdService {
     ) {
       throw new AppError('Campos obrigatórios não informados.', 400)
     }
-
-    // (Opcional) Caso PDF seja obrigatório:
-    // if (!pdfBase64) throw new AppError('PDF é obrigatório.', 400)
 
     const atendimento = await prisma.atendimento.findUnique({
       where: { numeroAtendimento: BigInt(numeroAtendimento) },
@@ -109,14 +105,10 @@ export class CreateRtdService {
           data: { imagemRTD: pdfBase64 },
         })
 
-        // Conecta no ato alvo
-        // >>> ATENÇÃO: ajuste conforme seu schema de relação <<<
-        // Caso o Ato tenha a FK: imgRTDId Int?:
         await prismaTx.ato.update({
           where: { idAto: alvo.idAto },
           data: {
-            imgId: img.id, // se seu Ato tiver este campo
-            // ou: imgRTD: { connect: { id: img.id } } se o relation estiver nomeado assim
+            imgId: img.id,
           },
         })
       }
