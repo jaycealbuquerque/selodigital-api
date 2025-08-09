@@ -1,4 +1,3 @@
-// services/ato/selar-atos-por-atendimento-service.ts
 import { AppError } from '../../erros/AppError'
 import { prisma } from '../../lib/prisma'
 

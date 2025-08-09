@@ -5,6 +5,7 @@ import { SelosEstoqueController } from '../../controllers/selo/selos-estoque'
 import { SolicitarSelosController } from '../../controllers/selo/solicitar-selos'
 import { ensureAuthenticated } from '../../middlewares/ ensureAuthenticated'
 import { SelarAtosAtendimentoController } from '../../controllers/selo/selar-atos-atendimento'
+import { DeleteOneAtoController } from '../../controllers/selo/delete-one-ato'
 
 const seloRouter = Router()
 const consultarSelosController = new ConsultarSelosController()
@@ -12,6 +13,7 @@ const receberSelosController = new ReceberSelosController()
 const selosEstoqueController = new SelosEstoqueController()
 const solicitarSelosController = new SolicitarSelosController()
 const selarAtosAtendimentoController = new SelarAtosAtendimentoController()
+const deleteOneAtoController = new DeleteOneAtoController()
 
 seloRouter.get(
   '/consultarselos',
@@ -38,5 +40,11 @@ seloRouter.post(
   '/selaratos',
   ensureAuthenticated,
   selarAtosAtendimentoController.handle,
+)
+
+seloRouter.delete(
+  '/deletarato',
+  ensureAuthenticated,
+  deleteOneAtoController.handle,
 )
 export { seloRouter }
