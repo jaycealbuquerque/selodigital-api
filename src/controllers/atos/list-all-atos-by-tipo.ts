@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { ListarAtosPorTipoService } from '../../services/selo/list-all-atos-service'
+import { ListarAtosPorTipoService } from '../../services/atos/list-all-atos-service'
 
 export class ListarAtosPorTipoController {
   async handle(req: Request, res: Response) {

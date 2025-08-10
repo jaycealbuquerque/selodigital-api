@@ -6,7 +6,7 @@ interface DeleteAtendimentoInput {
   numeroAtendimento: string // recebido como string; convertido para BigInt
 }
 
-export class DeleteAllAtosByAtendimentoService1 {
+export class DeleteAllAtosByAtendimentoService {
   async execute({ numeroAtendimento }: DeleteAtendimentoInput) {
     if (!numeroAtendimento) {
       throw new AppError('Número de atendimento é obrigatório.', 400)

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { SelarAtosPorAtendimentoService } from '../../services/selo/selar-atos-service'
+import { SelarAtosPorAtendimentoService } from '../../services/atos/selar-atos-service'
 
 export class SelarAtosAtendimentoController {
   async handle(request: Request, response: Response) {

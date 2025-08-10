@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { ListAllAutService } from '../../services/aut/list-all-service'
+import { ListAllAutService } from '../../services/atos/list-all-service'
 
 export class ListAllAutController {
   async handle(request: Request, response: Response) {

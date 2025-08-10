@@ -8,6 +8,7 @@ import { rtdRouter } from './rtd/rec.routes'
 import { fermojuRouter } from './fermoju/fermoju.routes'
 import { seloRouter } from './selo/selo.routes'
 import { atendimentoRouter } from './atendimento/atendimento.routes'
+import { atosRouter } from './atos/selo.routes'
 
 const routes = Router()
 
@@ -19,5 +20,6 @@ routes.use(rtdRouter)
 routes.use(fermojuRouter)
 routes.use(seloRouter)
 routes.use(atendimentoRouter)
+routes.use(atosRouter)
 
 export default routes
