@@ -1,6 +1,6 @@
-// services/ato/listar-atos-por-tipo-service.ts
 import { AppError } from '../../erros/AppError'
 import { prisma } from '../../lib/prisma'
+// import { Prisma } from '@prisma/client'
 
 interface PaginatedResponse<T> {
   first: number
@@ -66,6 +66,10 @@ export class ListarAtosPorTipoService {
     const pageSafe = Math.min(Math.max(page, 1), Math.max(totalPages, 1))
     const skip = (pageSafe - 1) * perPage
 
+    // const orderByClause: Prisma.AtoOrderByWithRelationInput = {
+    //   [orderBy]: orderDir,
+    // }
+
     const atos = await prisma.ato.findMany({
       where,
       select: {
@@ -85,6 +89,7 @@ export class ListarAtosPorTipoService {
         createdAt: true,
       },
       orderBy: { [orderBy]: orderDir },
+      // orderBy: orderByClause,
       skip,
       take: perPage,
     })

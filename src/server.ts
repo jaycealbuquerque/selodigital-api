@@ -16,6 +16,7 @@ app.use(
     if (err instanceof AppError) {
       return response.status(err.statusCode).json({
         message: err.message,
+        // details: err.details,
       })
     }
     return response.status(500).json({
